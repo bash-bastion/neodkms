@@ -7,9 +7,9 @@ authors = ['Edwin Kofler <edwin@kofler.dev>']
 description = ''
 
 [run]
-dependencies = []
+dependencies = ['https://github.com/hyperupcall/bash-core@v0.11.0']
 binDirs = []
-sourceDirs = []
+sourceDirs = ['pkg/src/commands', 'pkg/src/util']
 builtinDirs = []
 completionDirs = []
 manDirs = []

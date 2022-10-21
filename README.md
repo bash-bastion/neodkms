@@ -7,6 +7,7 @@ Because [dell/dkms](https://github.com/dell/dkms) is a [disappointment](https://
 - Significantly improve Bash code
 - Better error messages (color, when stdin is a tty)
 - Faster and leaner
+- Improved exit codes
 - Autocomplete (todo)
 - Parallel builds (todo)
 

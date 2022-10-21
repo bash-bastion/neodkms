@@ -16,6 +16,12 @@ main.ndkms() {
 	unset -v files
 
 	# TODO: handle configuration
+	# ?? unset
+
+	# Ensure environment
+	PATH="$PATH:/usr/lib/dkms"
+	umask 022
+	unset -v CC CXX CFLAGS CXXFLAGS LDFLAGS
 
 	# Parse arguments
 	local flag_module= flag_module_version=
@@ -23,16 +29,16 @@ main.ndkms() {
 	local -a args=()
 	local i=
 	for ((i=0; i < $#; ++i)); do
-		local arg_current="${raw_args[i]}"
+		local arg="${raw_args[i]}"
 		local arg_next="${raw_args[i+1]}"
 
-		case $arg_current in
+		case $arg in
 		--module*|-m)
-			util.parse_flag "$arg_current" "$arg_next"
+			util.parse_flag "$arg" "$arg_next"
 			flag_module=$REPLY
 			;;
 		-v)
-			util.parse_flag "$arg_current" "$arg_next"
+			util.parse_flag "$arg" "$arg_next"
 			flag_module_version=$REPLY
 			;;
 		--kernelver*|-k)
@@ -92,17 +98,17 @@ main.ndkms() {
 		-j)
 			;;
 		-*)
-			if [[ -v DKMS_COMPAT ]]; then
-				util.compat_print_error $" Unknown option $arg_current"
+			if util.is_compat; then
+				util.compat_print_error $" Unknown option $arg"
 				util.compat_show_help
 			else
 				util.show_help
-				core.print_error "Unknown option: $arg_current"
+				core.print_error "Unknown option: $arg"
 			fi
 			exit 2
 			;;
 		*)
-			args+=("$arg_current")
+			args+=("$arg")
 			;;
 		esac
 	done; unset -v arg_{current,next} i raw_args
@@ -123,7 +129,7 @@ main.ndkms() {
 
 	# Set global variables
 	local tmp_install_tree= tmp_tmp=
-	if [[ -v DKMS_COMPAT ]]; then
+	if util.is_compat; then
 		tmp_install_tree='/lib/module'
 		tmp_tmp=${TMPDIR:-/tmp}
 	else
@@ -150,7 +156,7 @@ main.ndkms() {
 		# shellcheck disable=SC2053
 		if [[ $arg == @(remove|autoinstall|uninstall|install|match|mktarball|unbuild|build|add|status|ldtarball) ]]; then
 			if [ -n "$action" ]; then
-				if [[ -v DKMS_COMPAT ]]; then
+				if util.is_compat; then
 					util.compat_print_error $"I do not know how to handle $arg."
 					exit 4
 				else
@@ -167,7 +173,7 @@ main.ndkms() {
 		elif [[ -f $arg ]]; then
 			archive_location=$arg
 		else
-			if [[ -v DKMS_COMPAT ]]; then
+			if util.is_compat; then
 				:
 			else
 				core.print_warn "Invalid arguments: $arg"
@@ -181,7 +187,7 @@ main.ndkms() {
 
 	# Run final action
 	if [ -z "$action" ]; then
-		if [[ -v DKMS_COMPAT ]]; then
+		if util.is_compat; then
 			util.compat_print_error $"Unknown action specified: \"\"" # TODO: fix upstream?
 			util.compat_show_help
 			exit 0
